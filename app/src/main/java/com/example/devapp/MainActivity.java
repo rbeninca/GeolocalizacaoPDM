@@ -13,10 +13,18 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 
-public class MainActivity extends AppCompatActivity {
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+public class MainActivity extends AppCompatActivity  implements OnMapReadyCallback{
     private LocationManager locationManager;
     private LocationListener locationListener;
     private TextView TextViewLatitude, TextViewLongitude;
+    private GoogleMap mMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +39,10 @@ public class MainActivity extends AppCompatActivity {
                 // Use a nova localização aqui
                 TextViewLatitude.setText(String.valueOf(location.getLatitude()));
                 TextViewLongitude.setText(String.valueOf(location.getLongitude()));
+                LatLng currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                mMap.clear();
+                mMap.addMarker(new MarkerOptions().position(currentLocation).title("Sua Localização"));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15));
             }
 
             @Override
@@ -42,8 +54,19 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onProviderDisabled(String provider) {}
         };
-
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync((OnMapReadyCallback) this);
         checkLocationPermission();
+    }
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+
+        // Adicione um marcador e mova a câmera
+        LatLng localizacao = new LatLng(-34, 151); // Use a localização real aqui
+        mMap.addMarker(new MarkerOptions().position(localizacao).title("Marcador BR"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(localizacao));
     }
 
     private void checkLocationPermission() {
